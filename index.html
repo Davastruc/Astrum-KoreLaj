@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Astrum KoreLaj</title>
+
+<!-- PWA -->
+<link rel="manifest" href="/manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="KoreLaj">
+<meta name="application-name" content="Astrum KoreLaj">
+<meta name="theme-color" content="#070c1a">
+<meta name="description" content="Transcription en direct pour personnes malentendantes">
+
+<!-- Icônes Apple (iOS) -->
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512.png">
+
+<!-- Favicon -->
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+<link rel="shortcut icon" href="/icons/icon-192.png">
+
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@200;400;600;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue-deep: #070c1a;
+    --blue-dark: #0d1b3e;
+    --blue-mid: #1a3a7c;
+    --blue-main: #1e5dbe;
+    --blue-light: #3b82f6;
+    --blue-bright: #60a5fa;
+    --blue-glow: #93c5fd;
+    --accent-cyan: #06b6d4;
+    --text-primary: #f0f6ff;
+    --text-secondary: #94b4d4;
+    --text-muted: #4a6a8a;
+    --card-bg: rgba(13,27,62,0.85);
+    --card-border: rgba(59,130,246,0.2);
+    --success: #22c55e;
+    --danger: #ef4444;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;overflow:hidden;}
+  body{background:var(--blue-deep);color:var(--text-primary);font-family:'Exo 2',sans-serif;position:relative;}
+  body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 15% 15%,rgba(30,93,190,.2) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 85% 85%,rgba(6,182,212,.12) 0%,transparent 60%);pointer-events:none;z-index:0;}
+  body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(59,130,246,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,.035) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+
+  .app{position:relative;z-index:1;max-width:430px;margin:0 auto;height:100dvh;display:flex;flex-direction:column;overflow:hidden;}
+
+  /* HEADER */
+  .header{flex-shrink:0;padding:13px 16px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--card-border);background:rgba(7,12,26,.85);backdrop-filter:blur(20px);}
+  .logo-area{display:flex;align-items:center;gap:10px;}
+  .logo-slot{width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,var(--blue-mid),var(--blue-main));border:1.5px solid var(--blue-light);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;box-shadow:0 0 16px rgba(30,93,190,.4);}
+  .logo-slot img{width:100%;height:100%;object-fit:cover;border-radius:9px;display:block;}
+  .app-name{font-size:16px;font-weight:900;letter-spacing:1px;background:linear-gradient(135deg,var(--blue-bright),var(--accent-cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  .app-sub{font-size:8px;color:var(--text-muted);letter-spacing:2px;font-family:'Space Mono';text-transform:uppercase;}
+  .conn-badge{display:flex;align-items:center;gap:5px;padding:5px 9px;border-radius:20px;font-size:9px;font-family:'Space Mono';font-weight:700;letter-spacing:.5px;border:1px solid;transition:all .3s;}
+  .conn-badge.on{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.4);color:#4ade80;}
+  .conn-badge.off{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.4);color:#f87171;}
+  .dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+  .dot.pulse{animation:dp 1.5s infinite;}
+  @keyframes dp{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(.7);}}
+
+  /* SCROLLABLE */
+  .content{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:72px;}
+  .content::-webkit-scrollbar{width:3px;}
+  .content::-webkit-scrollbar-thumb{background:var(--blue-mid);border-radius:2px;}
+
+  /* LISTEN HERO */
+  .listen-hero{padding:20px 16px 12px;display:flex;flex-direction:column;align-items:center;gap:11px;}
+  .listen-wrap{position:relative;display:flex;align-items:center;justify-content:center;}
+  .ring{position:absolute;border-radius:50%;border:1.5px solid var(--blue-light);opacity:0;pointer-events:none;}
+  .r1{width:104px;height:104px;}.r2{width:132px;height:132px;}.r3{width:160px;height:160px;}
+  .listening .r1{animation:rp 2s 0s infinite;}.listening .r2{animation:rp 2s .35s infinite;}.listening .r3{animation:rp 2s .7s infinite;}
+  @keyframes rp{0%{opacity:.7;transform:scale(.85);}100%{opacity:0;transform:scale(1.2);}}
+  .listen-btn{width:84px;height:84px;border-radius:50%;background:linear-gradient(145deg,var(--blue-mid),var(--blue-main));border:2px solid var(--blue-light);box-shadow:0 0 26px rgba(30,93,190,.5),0 0 52px rgba(30,93,190,.18),inset 0 1px 0 rgba(255,255,255,.08);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;gap:5px;-webkit-user-select:none;user-select:none;}
+  .listen-btn:active{transform:scale(.94);}
+  .listen-btn.active{background:linear-gradient(145deg,var(--blue-main),var(--accent-cyan));border-color:var(--accent-cyan);box-shadow:0 0 34px rgba(6,182,212,.55),0 0 68px rgba(6,182,212,.18);}
+  .waves{display:flex;align-items:center;gap:3px;height:22px;}
+  .waves span{display:block;width:3px;background:var(--blue-glow);border-radius:2px;height:4px;}
+  .listen-btn.active .waves span{animation:wa .7s ease-in-out infinite;}
+  .listen-btn.active .waves span:nth-child(1){animation-delay:0s;}
+  .listen-btn.active .waves span:nth-child(2){animation-delay:.1s;}
+  .listen-btn.active .waves span:nth-child(3){animation-delay:.2s;}
+  .listen-btn.active .waves span:nth-child(4){animation-delay:.1s;}
+  .listen-btn.active .waves span:nth-child(5){animation-delay:0s;}
+  @keyframes wa{0%,100%{height:4px;}50%{height:20px;}}
+  .btn-lbl{font-size:8px;font-family:'Space Mono';letter-spacing:1px;color:var(--blue-glow);font-weight:700;}
+  .listen-status{font-size:11px;color:var(--text-secondary);font-family:'Space Mono';letter-spacing:.5px;}
+  .seg-row{display:flex;align-items:center;justify-content:center;gap:8px;}
+  .seg-label{font-size:9px;color:var(--text-muted);font-family:'Space Mono';}
+  .seg-btns{display:flex;gap:5px;}
+  .seg-btn{padding:3px 9px;border-radius:6px;border:1px solid var(--card-border);background:var(--card-bg);font-size:9px;font-family:'Space Mono';color:var(--text-muted);cursor:pointer;transition:all .15s;}
+  .seg-btn.active{border-color:var(--blue-bright);color:var(--blue-bright);background:rgba(30,93,190,.2);}
+
+  /* SECTIONS */
+  .section{padding:0 16px 13px;}
+  .slabel{font-size:9px;font-family:'Space Mono';color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+  .lang-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;}
+  .lang-btn{padding:9px 4px;border-radius:11px;border:1.5px solid var(--card-border);background:var(--card-bg);display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:all .2s;backdrop-filter:blur(10px);}
+  .lang-btn.active{border-color:var(--blue-bright);background:rgba(30,93,190,.28);box-shadow:0 0 12px rgba(59,130,246,.22);}
+  .lang-flag{font-size:20px;}.lang-name{font-size:8px;font-family:'Space Mono';color:var(--text-muted);}
+  .lang-btn.active .lang-name{color:var(--blue-bright);}
+  .src-row{display:flex;gap:7px;}
+  .src-tab{flex:1;padding:9px 4px;border-radius:11px;border:1.5px solid var(--card-border);background:var(--card-bg);display:flex;align-items:center;justify-content:center;gap:5px;cursor:pointer;transition:all .2s;font-size:10px;font-weight:600;color:var(--text-muted);}
+  .src-tab.active{border-color:var(--blue-bright);background:rgba(30,93,190,.22);color:var(--blue-bright);}
+  .src-tab svg{width:13px;height:13px;flex-shrink:0;}
+
+  /* TRANSCRIPT */
+  .trans-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+  .trans-actions{display:flex;gap:6px;}
+  .iBtn{width:28px;height:28px;border-radius:7px;border:1px solid var(--card-border);background:var(--card-bg);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;color:var(--text-muted);}
+  .iBtn:hover{border-color:var(--blue-light);color:var(--blue-bright);}
+  .iBtn svg{width:13px;height:13px;}
+  .trans-box{background:var(--card-bg);border:1.5px solid var(--card-border);border-radius:14px;padding:14px;min-height:155px;max-height:210px;overflow-y:auto;backdrop-filter:blur(20px);scroll-behavior:smooth;}
+  .trans-box::-webkit-scrollbar{width:3px;}
+  .trans-box::-webkit-scrollbar-thumb{background:var(--blue-mid);border-radius:2px;}
+  .trans-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:125px;gap:10px;color:var(--text-muted);}
+  .trans-empty svg{width:34px;height:34px;opacity:.22;}
+  .trans-empty p{font-size:11px;font-family:'Space Mono';text-align:center;line-height:1.7;}
+  .trans-line{margin-bottom:11px;animation:fiu .3s ease;}
+  @keyframes fiu{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .trans-meta{display:flex;align-items:center;gap:7px;margin-bottom:3px;}
+  .trans-time{font-size:8px;font-family:'Space Mono';color:var(--text-muted);}
+  .trans-tag{font-size:8px;font-family:'Space Mono';padding:1px 5px;border-radius:4px;background:rgba(30,93,190,.3);color:var(--blue-bright);border:1px solid rgba(59,130,246,.25);}
+  .trans-text{font-size:16px;font-weight:400;line-height:1.65;color:var(--text-primary);}
+  .proc-row{display:flex;align-items:center;gap:8px;padding:8px 0;}
+  .proc-dots span{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--accent-cyan);animation:pd .9s infinite;}
+  .proc-dots span:nth-child(2){animation-delay:.2s;}.proc-dots span:nth-child(3){animation-delay:.4s;}
+  @keyframes pd{0%,100%{opacity:.2;transform:scale(.7);}50%{opacity:1;transform:scale(1);}}
+  .proc-label{font-size:10px;font-family:'Space Mono';color:var(--accent-cyan);}
+  .font-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:9px;}
+  .fBtn{width:29px;height:29px;border-radius:7px;border:1px solid var(--card-border);background:var(--card-bg);color:var(--text-secondary);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+  .fBtn:hover{border-color:var(--blue-light);color:var(--blue-bright);}
+  .fLbl{font-size:9px;font-family:'Space Mono';color:var(--text-muted);min-width:28px;text-align:center;}
+  .err-box{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);border-radius:9px;padding:10px 12px;margin-top:7px;font-size:11px;font-family:'Space Mono';color:#f87171;line-height:1.65;display:none;white-space:pre-wrap;}
+  .err-box.show{display:block;}
+
+  /* HEALTH */
+  .health-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+  .hcard{background:var(--card-bg);border:1.5px solid var(--card-border);border-radius:13px;padding:12px;backdrop-filter:blur(20px);}
+  .hcard-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;}
+  .hicon{width:29px;height:29px;border-radius:8px;display:flex;align-items:center;justify-content:center;}
+  .hicon.bp{background:rgba(239,68,68,.12);}.hicon.rt{background:rgba(6,182,212,.12);}
+  .hicon svg{width:15px;height:15px;}.hicon.bp svg{stroke:#f87171;}.hicon.rt svg{stroke:var(--accent-cyan);}
+  .hbadge{font-size:7px;font-family:'Space Mono';padding:2px 5px;border-radius:4px;}
+  .hbadge.ok{background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.3);}
+  .hbadge.tr{background:rgba(6,182,212,.12);color:var(--accent-cyan);border:1px solid rgba(6,182,212,.3);}
+  .hval{font-size:21px;font-weight:900;font-family:'Space Mono';line-height:1;}
+  .hunit{font-size:8px;color:var(--text-muted);font-family:'Space Mono';margin-top:2px;}
+  .bp-bars{display:flex;align-items:flex-end;gap:2px;height:22px;margin-top:7px;}
+  .bp-bar{flex:1;border-radius:2px 2px 0 0;background:linear-gradient(to top,rgba(239,68,68,.8),rgba(239,68,68,.25));transition:height .5s ease;}
+  .rstats{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:6px;}
+  .rstat-v{font-size:13px;font-weight:700;font-family:'Space Mono';color:var(--blue-bright);}
+  .rstat-l{font-size:7px;color:var(--text-muted);font-family:'Space Mono';}
+  .map-card{grid-column:1/-1;background:var(--card-bg);border:1.5px solid var(--card-border);border-radius:13px;padding:12px;}
+  .map-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+  .map-inner{height:76px;background:linear-gradient(135deg,rgba(13,27,62,.8),rgba(26,58,124,.35));border-radius:9px;border:1px solid rgba(59,130,246,.1);position:relative;overflow:hidden;}
+  .map-grid-ov{position:absolute;inset:0;background-image:linear-gradient(rgba(59,130,246,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,.07) 1px,transparent 1px);background-size:18px 18px;}
+  .map-line{position:absolute;width:55%;height:2px;background:linear-gradient(90deg,transparent,var(--blue-bright),var(--accent-cyan));top:50%;left:22%;}
+  .map-dot{position:absolute;width:9px;height:9px;border-radius:50%;background:var(--accent-cyan);box-shadow:0 0 7px var(--accent-cyan);top:calc(50% - 4px);right:24%;}
+  .map-dot::before{content:'';position:absolute;inset:-4px;border-radius:50%;border:1px solid var(--accent-cyan);animation:mp 1.5s infinite;}
+  @keyframes mp{0%{opacity:.8;transform:scale(.8);}100%{opacity:0;transform:scale(2);}}
+  .map-inner span{position:absolute;bottom:6px;left:50%;transform:translateX(-50%);font-size:8px;font-family:'Space Mono';color:var(--text-muted);white-space:nowrap;}
+
+  /* TOAST */
+  .toast{position:fixed;top:0;left:50%;transform:translateX(-50%) translateY(-80px);background:rgba(13,27,62,.96);border:1px solid var(--blue-light);border-radius:10px;padding:9px 14px;font-size:11px;font-family:'Space Mono';color:var(--blue-bright);backdrop-filter:blur(20px);z-index:9999;transition:transform .3s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;box-shadow:0 4px 24px rgba(0,0,0,.5);pointer-events:none;}
+  .toast.show{transform:translateX(-50%) translateY(70px);}
+
+  /* BOTTOM NAV */
+  .bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(7,12,26,.93);backdrop-filter:blur(20px);border-top:1px solid var(--card-border);display:flex;padding:8px 0 13px;z-index:100;}
+  .nitem{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:3px;color:var(--text-muted);transition:all .2s;border-radius:8px;}
+  .nitem:hover,.nitem.active{color:var(--blue-bright);}
+  .nitem.active svg{filter:drop-shadow(0 0 5px rgba(96,165,250,.7));}
+  .nitem svg{width:20px;height:20px;}
+  .nitem span{font-size:8px;font-family:'Space Mono';letter-spacing:.3px;}
+
+  /* PAGES */
+  .page{display:none;}.page.active{display:block;}
+
+  /* SETTINGS SHEET */
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:500;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .3s;}
+  .overlay.open{opacity:1;pointer-events:all;}
+  .sheet{width:100%;max-width:430px;margin:0 auto;background:var(--blue-dark);border:1px solid var(--card-border);border-radius:22px 22px 0 0;padding:18px;transform:translateY(100%);transition:transform .3s cubic-bezier(.34,1.2,.64,1);max-height:80vh;overflow-y:auto;}
+  .overlay.open .sheet{transform:translateY(0);}
+  .sh-handle{width:32px;height:3px;background:var(--text-muted);border-radius:2px;margin:0 auto 16px;}
+  .sh-title{font-size:16px;font-weight:700;margin-bottom:16px;color:var(--blue-bright);}
+  .srow{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--card-border);}
+  .srow:last-child{border-bottom:none;}
+  .sinfo-n{font-size:12px;font-weight:600;}.sinfo-d{font-size:9px;color:var(--text-muted);font-family:'Space Mono';margin-top:2px;}
+  .toggle{width:42px;height:22px;background:var(--blue-mid);border-radius:11px;position:relative;cursor:pointer;transition:background .2s;border:none;flex-shrink:0;}
+  .toggle.on{background:var(--blue-light);}
+  .toggle::after{content:'';position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;top:3px;left:3px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.3);}
+  .toggle.on::after{left:23px;}
+
+  /* HISTORY & PROFILE */
+  .hlist{padding:0 16px;}
+  .hitem{background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:12px;margin-bottom:9px;}
+  .hmeta{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
+  .hdate{font-size:8px;font-family:'Space Mono';color:var(--text-muted);}
+  .hlang{font-size:8px;font-family:'Space Mono';color:var(--blue-bright);}
+  .hprev{font-size:12px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+  @media(max-width:360px){.lang-flag{font-size:17px;}.hval{font-size:18px;}.trans-text{font-size:14px;}}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<!-- Settings -->
+<div class="overlay" id="settingsOverlay">
+  <div class="sheet">
+    <div class="sh-handle"></div>
+    <div class="sh-title">⚙ Paramètres</div>
+    <div class="srow">
+      <div><div class="sinfo-n">Activation auto (WiFi/4G)</div><div class="sinfo-d">S'active dès connexion internet</div></div>
+      <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+    </div>
+    <div class="srow">
+      <div><div class="sinfo-n">Vibration à la détection</div><div class="sinfo-d">Vibre quand une voix est détectée</div></div>
+      <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+    </div>
+    <div class="srow">
+      <div><div class="sinfo-n">Suivi de santé</div><div class="sinfo-d">Tension & parcours actifs</div></div>
+      <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+    </div>
+    <div class="srow">
+      <div><div class="sinfo-n">Sauvegarde automatique</div><div class="sinfo-d">Enregistre l'historique</div></div>
+      <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+    </div>
+
+  </div>
+</div>
+
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo-area">
+      <div class="logo-slot">
+        <img src="/images/logo.png" alt="Astrum KoreLaj" id="logoImg">
+      </div>
+      <div>
+        <div class="app-name">ASTRUM KORELAJ</div>
+        <div class="app-sub">Accessibilité intelligente</div>
+      </div>
+    </div>
+    <div class="conn-badge on" id="connBadge">
+      <span class="dot pulse"></span>
+      <span id="connTxt">EN LIGNE</span>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- HOME -->
+    <div class="page active" id="pg-home">
+
+      <!-- LISTEN HERO -->
+      <div class="listen-hero">
+        <div class="listen-wrap" id="listenWrap">
+          <div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div>
+          <div class="listen-btn" id="listenBtn" onclick="toggleListen()">
+            <div class="waves"><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="btn-lbl" id="btnLbl">ÉCOUTER</div>
+          </div>
+        </div>
+        <div class="listen-status" id="listenStatus">Appuyer pour commencer</div>
+        <div class="seg-row">
+          <span class="seg-label">Segment :</span>
+          <div class="seg-btns">
+            <div class="seg-btn" onclick="setSeg(3,this)">3s</div>
+            <div class="seg-btn active" onclick="setSeg(5,this)">5s</div>
+            <div class="seg-btn" onclick="setSeg(10,this)">10s</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LANGUAGE -->
+      <div class="section">
+        <div class="slabel">Langue de transcription</div>
+        <div class="lang-grid">
+          <div class="lang-btn" onclick="setLang(this,'ht','Kreyòl')"><div class="lang-flag">🇭🇹</div><div class="lang-name">Kreyòl</div></div>
+          <div class="lang-btn active" onclick="setLang(this,'fr','Français')"><div class="lang-flag">🇫🇷</div><div class="lang-name">Français</div></div>
+          <div class="lang-btn" onclick="setLang(this,'en','English')"><div class="lang-flag">🇺🇸</div><div class="lang-name">English</div></div>
+          <div class="lang-btn" onclick="setLang(this,'es','Español')"><div class="lang-flag">🇪🇸</div><div class="lang-name">Español</div></div>
+        </div>
+      </div>
+
+      <!-- SOURCE -->
+      <div class="section">
+        <div class="slabel">Source audio</div>
+        <div class="src-row">
+          <div class="src-tab active" onclick="setSrc(this,'mic')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+            Voix directe
+          </div>
+          <div class="src-tab" onclick="setSrc(this,'media')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+            Vidéo
+          </div>
+          <div class="src-tab" onclick="setSrc(this,'phone')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 9.91 19.79 19.79 0 0 1 1.61 1.27 2 2 0 0 1 3.6 0h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 7.91A16 16 0 0 0 16 16l.95-.95a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            Appel
+          </div>
+        </div>
+      </div>
+
+      <!-- TRANSCRIPT -->
+      <div class="section">
+        <div class="trans-header">
+          <div class="slabel" style="margin-bottom:0">Transcription en direct</div>
+          <div class="trans-actions">
+            <div class="iBtn" onclick="copyTrans()" title="Copier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></div>
+            <div class="iBtn" onclick="shareTrans()" title="Partager"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></div>
+            <div class="iBtn" onclick="clearTrans()" title="Effacer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></div>
+          </div>
+        </div>
+
+        <div class="trans-box" id="transBox">
+          <div class="trans-empty" id="transEmpty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <p>Appuyez sur le bouton<br>pour commencer la transcription</p>
+          </div>
+        </div>
+        <div class="err-box" id="errBox"></div>
+        <div class="font-row">
+          <button class="fBtn" onclick="chFont(-1)">A−</button>
+          <span class="fLbl" id="fLbl">16px</span>
+          <button class="fBtn" onclick="chFont(1)">A+</button>
+        </div>
+      </div>
+
+      <!-- HEALTH -->
+      <div class="section">
+        <div class="slabel">Suivi de santé</div>
+        <div class="health-grid">
+          <div class="hcard">
+            <div class="hcard-h">
+              <div class="hicon bp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+              <span class="hbadge ok">NORMAL</span>
+            </div>
+            <div class="hval" id="bpVal">120/80</div>
+            <div class="hunit">mmHg · Tension</div>
+            <div class="bp-bars" id="bpBars">
+              <div class="bp-bar" style="height:55%"></div><div class="bp-bar" style="height:65%"></div>
+              <div class="bp-bar" style="height:70%"></div><div class="bp-bar" style="height:60%"></div>
+              <div class="bp-bar" style="height:75%"></div><div class="bp-bar" style="height:68%"></div>
+              <div class="bp-bar" style="height:72%"></div>
+            </div>
+          </div>
+          <div class="hcard">
+            <div class="hcard-h">
+              <div class="hicon rt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg></div>
+              <span class="hbadge tr">ACTIF</span>
+            </div>
+            <div class="rstats">
+              <div><div class="rstat-v" id="distV">2.4</div><div class="rstat-l">km</div></div>
+              <div><div class="rstat-v" id="stepsV">3 241</div><div class="rstat-l">pas</div></div>
+              <div><div class="rstat-v" id="timeV">38</div><div class="rstat-l">min</div></div>
+              <div><div class="rstat-v" id="calV">184</div><div class="rstat-l">cal</div></div>
+            </div>
+          </div>
+          <div class="map-card">
+            <div class="map-head">
+              <span style="font-size:10px;font-weight:700;color:var(--accent-cyan)">📍 Position GPS</span>
+              <span style="font-size:8px;font-family:'Space Mono';color:var(--text-muted)">EN DIRECT</span>
+            </div>
+            <div class="map-inner">
+              <div class="map-grid-ov"></div><div class="map-line"></div><div class="map-dot"></div>
+              <span>Connexion GPS requise</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="height:6px"></div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="page" id="pg-history">
+      <div style="padding:14px 16px 10px"><div class="slabel">Historique des transcriptions</div></div>
+      <div class="hlist" id="histList"><div style="text-align:center;padding:40px 0;color:var(--text-muted);font-family:'Space Mono';font-size:10px">Aucune transcription enregistrée</div></div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="page" id="pg-profile">
+      <div style="padding:14px 16px">
+        <div class="slabel">Mon profil</div>
+        <div style="background:var(--card-bg);border:1.5px solid var(--card-border);border-radius:14px;padding:16px;margin-bottom:10px">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+            <div style="width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,var(--blue-mid),var(--blue-main));border:2px solid var(--blue-light);display:flex;align-items:center;justify-content:center;font-size:22px">👤</div>
+            <div><div style="font-size:15px;font-weight:700">Utilisateur KoreLaj</div><div style="font-size:9px;font-family:'Space Mono';color:var(--text-muted)">PROFIL MALENTENDANT</div></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div style="background:rgba(30,93,190,.1);border:1px solid var(--card-border);border-radius:9px;padding:10px"><div style="font-size:20px;font-weight:900;font-family:'Space Mono';color:var(--blue-bright)" id="pCount">0</div><div style="font-size:8px;font-family:'Space Mono';color:var(--text-muted)">Transcriptions</div></div>
+            <div style="background:rgba(6,182,212,.1);border:1px solid var(--card-border);border-radius:9px;padding:10px"><div style="font-size:20px;font-weight:900;font-family:'Space Mono';color:var(--accent-cyan)" id="pMins">0</div><div style="font-size:8px;font-family:'Space Mono';color:var(--text-muted)">Min écoutées</div></div>
+          </div>
+        </div>
+        <div style="background:var(--card-bg);border:1.5px solid var(--card-border);border-radius:14px;padding:14px">
+          <div style="font-size:11px;font-weight:700;margin-bottom:10px;color:var(--blue-bright)">Langues activées</div>
+          <div style="display:flex;gap:7px;flex-wrap:wrap">
+            <span style="padding:5px 10px;border-radius:7px;background:rgba(30,93,190,.18);border:1px solid var(--blue-light);font-size:10px">🇭🇹 Kreyòl</span>
+            <span style="padding:5px 10px;border-radius:7px;background:rgba(30,93,190,.18);border:1px solid var(--blue-light);font-size:10px">🇫🇷 Français</span>
+            <span style="padding:5px 10px;border-radius:7px;background:rgba(30,93,190,.18);border:1px solid var(--blue-light);font-size:10px">🇺🇸 English</span>
+            <span style="padding:5px 10px;border-radius:7px;background:rgba(30,93,190,.18);border:1px solid var(--blue-light);font-size:10px">🇪🇸 Español</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- BOTTOM NAV -->
+  <div class="bnav">
+    <div class="nitem active" onclick="goPage('home',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Accueil</span>
+    </div>
+    <div class="nitem" onclick="goPage('history',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span>Historique</span>
+    </div>
+    <div class="nitem" onclick="goPage('profile',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Profil</span>
+    </div>
+    <div class="nitem" onclick="openSettings()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span>Réglages</span>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+let isListening   = false;
+let mediaRecorder = null;
+let audioStream   = null;
+let segDur        = 5000;
+let currentLang   = 'fr';
+let currentLabel  = 'Français';
+let fontSize      = 16;
+let transcriptCount = 0;
+let minutesListened = 0;
+let listenStart   = null;
+let historyData   = [];
+
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+window.addEventListener('load', () => {
+  setConn(navigator.onLine);
+  startHealth();
+  setTimeout(() => showToast('🔵 Astrum KoreLaj — Prêt'), 700);
+});
+window.addEventListener('online',  () => setConn(true));
+window.addEventListener('offline', () => { setConn(false); if(isListening) stopListen(); });
+
+// ═══════════════════════════════════════
+// CONNECTION
+// ═══════════════════════════════════════
+function setConn(on) {
+  const b = document.getElementById('connBadge');
+  b.className = 'conn-badge ' + (on ? 'on' : 'off');
+  document.getElementById('connTxt').textContent = on ? 'EN LIGNE' : 'HORS LIGNE';
+  b.querySelector('.dot').className = 'dot' + (on ? ' pulse' : '');
+}
+
+// ═══════════════════════════════════════
+// CONTROLS
+// ═══════════════════════════════════════
+function setLang(el, code, label) {
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  currentLang = code; currentLabel = label;
+  showToast('🌐 Langue : ' + label);
+}
+function setSrc(el) {
+  document.querySelectorAll('.src-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+function setSeg(val, el) {
+  segDur = val * 1000;
+  document.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  showToast('⏱ Segment : ' + val + 's');
+}
+
+// ═══════════════════════════════════════
+// LISTEN — uses Web Speech API (best mobile support)
+// with MediaRecorder as fallback
+// ═══════════════════════════════════════
+async function toggleListen() {
+  if (isListening) { stopListen(); return; }
+  await startListen();
+}
+
+async function startListen() {
+  hideErr();
+  if (!navigator.onLine) { showToast('⚠️ Connexion requise'); return; }
+
+  // --- Try Web Speech API first (Chrome Android/iOS Safari) ---
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (SR) {
+    startWebSpeech(SR);
+    return;
+  }
+
+  // --- Fallback: MediaRecorder + demo ---
+  try {
+    audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    isListening = true;
+    listenStart = Date.now();
+    updateUI(true);
+    showToast('🎙 Écoute démarrée');
+    vibrate([50]);
+    recordLoop();
+  } catch(err) {
+    showErr(
+      '❌ Microphone non autorisé.\n\n' +
+      'Pour activer le micro :\n' +
+      '• Navigateur → Réglages → Autorisations\n' +
+      '• Activer "Microphone" pour ce site\n' +
+      '• Recharger la page'
+    );
+  }
+}
+
+// ─── Web Speech API ───────────────────
+let recognition = null;
+
+function startWebSpeech(SR) {
+  recognition = new SR();
+  recognition.continuous    = true;
+  recognition.interimResults = true;
+  recognition.lang = getLangCode();
+
+  recognition.onstart = () => {
+    isListening = true;
+    listenStart = Date.now();
+    updateUI(true);
+    showToast('🎙 Écoute démarrée');
+    vibrate([50]);
+  };
+
+  recognition.onresult = (e) => {
+    // Remove any interim line
+    document.getElementById('interimLine')?.remove();
+
+    let interim = '', final = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      if (e.results[i].isFinal) final += t + ' ';
+      else interim += t;
+    }
+
+    if (final.trim()) {
+      addLine(final.trim());
+      saveHist(final.trim());
+      transcriptCount++;
+      vibrate([25]);
+    }
+    if (interim) showInterim(interim);
+  };
+
+  recognition.onerror = (e) => {
+    if (e.error === 'not-allowed') {
+      showErr(
+        '❌ Microphone refusé par le navigateur.\n\n' +
+        '• Chrome : cliquer sur 🔒 dans la barre d\'adresse\n' +
+        '• Safari : Réglages > Safari > Microphone\n' +
+        '• Autoriser le microphone puis recharger.'
+      );
+      recognition.onend = null;
+      try { recognition.stop(); } catch(e) {}
+      recognition = null;
+      isListening = false;
+      updateUI(false);
+    } else if (e.error !== 'no-speech') {
+      showToast('⚠️ ' + e.error);
+    }
+  };
+
+  recognition.onend = () => {
+    if (isListening) {
+      try { recognition.start(); } catch(e) {}
+    }
+  };
+
+  try { recognition.start(); }
+  catch(e) { showToast('⚠️ Impossible de démarrer : ' + e.message); }
+}
+
+function getLangCode() {
+  const map = { fr:'fr-FR', en:'en-US', es:'es-ES', ht:'fr-FR' };
+  return map[currentLang] || 'fr-FR';
+}
+
+function showInterim(text) {
+  const empty = document.getElementById('transEmpty');
+  if (empty) empty.remove();
+  const box = document.getElementById('transBox');
+  let el = document.getElementById('interimLine');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'interimLine';
+    el.style.cssText = 'font-size:'+fontSize+'px;color:var(--text-muted);font-style:italic;padding:4px 0;animation:fiu .2s ease';
+    box.appendChild(el);
+  }
+  el.textContent = text + ' ▌';
+  box.scrollTop = box.scrollHeight;
+}
+
+// ─── MediaRecorder loop (fallback) ────
+function recordLoop() {
+  if (!isListening || !audioStream) return;
+  const chunks = [];
+  const mime = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4']
+    .find(m => MediaRecorder.isTypeSupported(m)) || '';
+  try { mediaRecorder = new MediaRecorder(audioStream, mime ? {mimeType:mime} : {}); }
+  catch(e) { mediaRecorder = new MediaRecorder(audioStream); }
+
+  mediaRecorder.ondataavailable = e => { if(e.data?.size>0) chunks.push(e.data); };
+  mediaRecorder.onstop = async () => {
+    if (!isListening) return;
+    const blob = new Blob(chunks, {type: mediaRecorder.mimeType||'audio/webm'});
+    if (blob.size > 300) await transcribeBlob(blob);
+    if (isListening) recordLoop();
+  };
+  mediaRecorder.start();
+  setTimeout(() => { if(mediaRecorder?.state==='recording') mediaRecorder.stop(); }, segDur);
+}
+
+async function transcribeBlob(blob) {
+  showProc(true);
+  try {
+    const b64 = await blobToBase64(blob);
+    const prompts = {
+      fr: 'Transcris exactement ce que tu entends en français. Retourne UNIQUEMENT le texte, sans commentaires.',
+      en: 'Transcribe exactly what you hear in English. Return ONLY the text, no comments.',
+      es: 'Transcribe exactamente lo que escuchas en español. Devuelve SOLO el texto.',
+      ht: 'Transcri egzakteman sa ou tande an kreyòl. Retounen SÈLMAN tèks la.'
+    };
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        messages:[{role:'user',content:[
+          {type:'text',text: prompts[currentLang]||prompts.fr},
+          {type:'document',source:{type:'base64',media_type:blob.type||'audio/webm',data:b64}}
+        ]}]
+      })
+    });
+    const data = await res.json();
+    if (data.error) { showToast('⚠️ Erreur API'); return; }
+    const text = data.content?.find(c=>c.type==='text')?.text?.trim();
+    if (text && text.length>1) { addLine(text); saveHist(text); transcriptCount++; vibrate([25]); }
+  } catch(e) { console.warn(e); }
+  finally { showProc(false); }
+}
+
+function stopListen() {
+  isListening = false;
+  document.getElementById('interimLine')?.remove();
+  if (recognition) { recognition.onend=null; try{recognition.stop();}catch(e){} recognition=null; }
+  if (mediaRecorder?.state==='recording') mediaRecorder.stop();
+  if (audioStream) { audioStream.getTracks().forEach(t=>t.stop()); audioStream=null; }
+  if (listenStart) { minutesListened += Math.floor((Date.now()-listenStart)/60000); listenStart=null; }
+  showProc(false);
+  updateUI(false);
+  showToast('⏹ Transcription arrêtée');
+}
+
+function updateUI(on) {
+  document.getElementById('listenBtn').classList.toggle('active', on);
+  document.getElementById('listenWrap').classList.toggle('listening', on);
+  document.getElementById('btnLbl').textContent  = on ? 'ACTIF' : 'ÉCOUTER';
+  document.getElementById('listenStatus').textContent = on ? 'Transcription en cours...' : 'Appuyer pour commencer';
+}
+
+// ═══════════════════════════════════════
+// TRANSCRIPT UI
+// ═══════════════════════════════════════
+function addLine(text) {
+  document.getElementById('transEmpty')?.remove();
+  document.getElementById('interimLine')?.remove();
+  const box  = document.getElementById('transBox');
+  const proc = document.getElementById('procRow');
+  const div  = document.createElement('div');
+  div.className = 'trans-line';
+  const now = new Date();
+  const t = [now.getHours(),now.getMinutes(),now.getSeconds()].map(n=>n.toString().padStart(2,'0')).join(':');
+  div.innerHTML = `<div class="trans-meta"><span class="trans-time">${t}</span><span class="trans-tag">${currentLabel.toUpperCase()}</span></div><div class="trans-text" style="font-size:${fontSize}px">${esc(text)}</div>`;
+  if (proc) box.insertBefore(div, proc); else box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+function showProc(on) {
+  let el = document.getElementById('procRow');
+  if (on && !el) {
+    el = document.createElement('div'); el.id='procRow'; el.className='proc-row';
+    el.innerHTML='<div class="proc-dots"><span></span><span></span><span></span></div><span class="proc-label">Transcription...</span>';
+    document.getElementById('transBox').appendChild(el);
+    document.getElementById('transBox').scrollTop = 99999;
+  } else if (!on && el) el.remove();
+}
+
+function clearTrans() {
+  document.getElementById('transBox').innerHTML = '<div class="trans-empty" id="transEmpty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><p>Appuyez sur le bouton<br>pour commencer la transcription</p></div>';
+  showToast('🗑 Effacé');
+}
+function copyTrans() {
+  const els = document.querySelectorAll('.trans-text');
+  if (!els.length) { showToast('⚠️ Rien à copier'); return; }
+  navigator.clipboard?.writeText([...els].map(e=>e.textContent).join('\n')).then(()=>showToast('📋 Copié'));
+}
+function shareTrans() {
+  const els = document.querySelectorAll('.trans-text');
+  if (!els.length) { showToast('⚠️ Rien à partager'); return; }
+  const text = [...els].map(e=>e.textContent).join('\n');
+  if (navigator.share) navigator.share({title:'Astrum KoreLaj',text});
+  else showToast('📤 Partage non dispo');
+}
+
+// ═══════════════════════════════════════
+// FONT
+// ═══════════════════════════════════════
+function chFont(d) {
+  fontSize = Math.max(12, Math.min(30, fontSize+d));
+  document.getElementById('fLbl').textContent = fontSize+'px';
+  document.querySelectorAll('.trans-text').forEach(e=>e.style.fontSize=fontSize+'px');
+}
+
+// ═══════════════════════════════════════
+// HISTORY
+// ═══════════════════════════════════════
+function saveHist(text) {
+  historyData.unshift({text, lang:currentLabel, time:new Date().toLocaleString('fr-FR')});
+  if (historyData.length > 60) historyData.pop();
+  renderHist();
+  document.getElementById('pCount').textContent = transcriptCount;
+  document.getElementById('pMins').textContent  = minutesListened;
+}
+function renderHist() {
+  const l = document.getElementById('histList');
+  if (!historyData.length) { l.innerHTML='<div style="text-align:center;padding:40px 0;color:var(--text-muted);font-family:\'Space Mono\';font-size:10px">Aucune transcription enregistrée</div>'; return; }
+  l.innerHTML = historyData.map(h=>`<div class="hitem"><div class="hmeta"><span class="hdate">${h.time}</span><span class="hlang">${h.lang}</span></div><div class="hprev">${esc(h.text)}</div></div>`).join('');
+}
+
+// ═══════════════════════════════════════
+// HEALTH
+// ═══════════════════════════════════════
+function startHealth() {
+  let steps=3241, time=38;
+  setInterval(() => {
+    steps += Math.floor(Math.random()*4);
+    document.getElementById('bpVal').textContent   = (115+Math.floor(Math.random()*14))+'/'+(74+Math.floor(Math.random()*10));
+    document.getElementById('stepsV').textContent  = steps.toLocaleString('fr');
+    document.getElementById('distV').textContent   = (steps*.00075).toFixed(1);
+    document.getElementById('calV').textContent    = Math.floor(steps*.057);
+    document.getElementById('timeV').textContent   = Math.floor(time += .016);
+    document.querySelectorAll('.bp-bar').forEach(b=>b.style.height=(35+Math.random()*52)+'%');
+  }, 2300);
+}
+
+// ═══════════════════════════════════════
+// NAV & SETTINGS
+// ═══════════════════════════════════════
+function goPage(id, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nitem').forEach(n=>n.classList.remove('active'));
+  document.getElementById('pg-'+id)?.classList.add('active');
+  el.classList.add('active');
+}
+function openSettings() { document.getElementById('settingsOverlay').classList.add('open'); }
+document.getElementById('settingsOverlay').addEventListener('click', function(e) { if(e.target===this) this.classList.remove('open'); });
+
+// ═══════════════════════════════════════
+// TOAST & ERROR
+// ═══════════════════════════════════════
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2600);
+}
+function showErr(msg) { const b=document.getElementById('errBox'); b.textContent=msg; b.classList.add('show'); }
+function hideErr()    { document.getElementById('errBox').classList.remove('show'); }
+
+// ═══════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════
+function vibrate(p) { try { navigator.vibrate?.(p); } catch(e){} }
+function blobToBase64(blob) { return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result.split(',')[1]); r.onerror=rej; r.readAsDataURL(blob); }); }
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ═══════════════════════════════════════
+// SERVICE WORKER REGISTRATION
+// ═══════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => console.log('SW enregistré :', reg.scope))
+      .catch(err => console.warn('SW erreur :', err));
+  });
+}
+</script>
+</body>
+</html>

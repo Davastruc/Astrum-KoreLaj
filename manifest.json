@@ -1,0 +1,36 @@
+{
+  "name": "Astrum KoreLaj",
+  "short_name": "KoreLaj",
+  "description": "Transcription en direct pour personnes malentendantes",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1e5dbe",
+  "theme_color": "#070c1a",
+  "lang": "fr",
+  "categories": ["accessibility", "health", "utilities"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Démarrer transcription",
+      "short_name": "Écouter",
+      "description": "Ouvrir et démarrer la transcription immédiatement",
+      "url": "/",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
